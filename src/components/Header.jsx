@@ -1,104 +1,166 @@
-import React from 'react'
+import React, { useState, useCallback, memo } from 'react'
+import { usePlanet } from '../context/PlanetContext'
 
-function Header() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+// Menu toggle button component
+const MenuToggleButton = memo(({ isOpen, onToggle }) => (
+  <button 
+    className="menu-toggle-btn" 
+    onClick={onToggle} 
+    aria-label={isOpen ? "Close planet menu" : "Open planet menu"}
+    aria-expanded={isOpen}
+  >
+    <span className={`hamburger ${isOpen ? 'active' : ''}`}>
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </button>
+))
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
+// Planet card component
+const PlanetCard = memo(({ planet, index }) => (
+  <div 
+    className="planet-card"
+    role="button"
+    tabIndex={0}
+    aria-label={`View ${planet.object_id || 'Unknown Planet'} details`}
+  >
+    <div 
+      className="planet-image" 
+      style={{ backgroundImage: `url('/planet_svg.svg')` }}
+      aria-hidden="true"
+    ></div>
+    <div className="planet-card-name">{planet.object_id || 'Unknown Planet'}</div>
+  </div>
+))
+
+// Filter group component
+const FilterGroup = memo(({ title, options }) => (
+  <div className="filter-group">
+    <div className="filter-title">{title}</div>
+    <div className="filter-options">
+      {options.map((option, index) => (
+        <button 
+          key={index}
+          className={`filter-option ${option.active ? 'active' : ''}`}
+          aria-pressed={option.active}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  </div>
+))
+
+const Header = memo(() => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { planets, loading, generateSafeKey } = usePlanet()
+
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev)
+  }, [])
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false)
+  }, [])
+
+  // Filter options data
+  const filterOptions = {
+    sunGroup: [
+      { label: 'Yes', active: true },
+      { label: 'No', active: false }
+    ],
+    massRegime: [
+      { label: 'Super-Earth', active: true },
+      { label: 'Giant planet', active: false },
+      { label: 'Ice giant', active: false },
+      { label: 'Mini-Neptune', active: false },
+      { label: 'Super-Jupiter', active: false }
+    ],
+    orbitalRegime: [
+      { label: 'Circumbinary planet', active: false },
+      { label: 'Double planet', active: false },
+      { label: 'Eccentric Jupiter', active: false },
+      { label: 'Exoplanet', active: false }
+    ]
   }
-
-  const planets = [
-    { id: 'ph-73b', name: 'PH 73B', image: '/planet_svg.svg' },
-    { id: 'mars', name: 'Mars', image: '/planet_svg.svg' },
-    { id: 'erias', name: 'Erias 713-T', image: '/planet_svg.svg' },
-    { id: 'europa', name: 'Europa', image: '/planet_svg.svg' },
-    { id: 'kepler', name: 'Kepler-22b', image: '/planet_svg.svg' },
-    { id: 'trappist', name: 'TRAPPIST-1e', image: '/planet_svg.svg' }
-  ]
 
   return (
     <>
       <header className="header">
         <div className="header-content">
           <div className="header-left">
-            <a href="#" className="logo-link">Logo</a>
+            <a href="/" className="logo-link" aria-label="Home">Logo</a>
           </div>
           
-          <nav className="header-nav">
+          <nav className="header-nav" role="navigation" aria-label="Main navigation">
             <a href="#" className="nav-link">Planets</a>
             <a href="#" className="nav-link">Explore</a>
             <a href="#" className="nav-link">About us</a>
           </nav>
           
           <div className="header-right">
-            <button className="menu-toggle-btn" onClick={toggleMenu} aria-label="Open planet menu">
-              <span className={`hamburger ${isMenuOpen ? 'active' : ''}`}>
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
+            <MenuToggleButton isOpen={isMenuOpen} onToggle={toggleMenu} />
+            <button className="donate-btn" aria-label="Donate to support our mission">
+              Donate
             </button>
-            <button className="donate-btn">Donate</button>
           </div>
         </div>
       </header>
 
       {/* Full-screen sidebar overlay */}
-      <div className={`sidebar-overlay ${isMenuOpen ? 'active' : ''}`} onClick={toggleMenu}>
-        <div className={`sidebar-content ${isMenuOpen ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div 
+        className={`sidebar-overlay ${isMenuOpen ? 'active' : ''}`} 
+        onClick={closeMenu}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!isMenuOpen}
+      >
+        <div 
+          className={`sidebar-content ${isMenuOpen ? 'active' : ''}`} 
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="sidebar-header">
-            <button className="close-btn" onClick={toggleMenu} aria-label="Close menu">
-              <span className="close-icon">&times;</span>
+            <button 
+              className="close-btn" 
+              onClick={closeMenu} 
+              aria-label="Close menu"
+            >
+              <span className="close-icon" aria-hidden="true">&times;</span>
             </button>
           </div>
           
           <div className="sidebar-title">Filters</div>
           
           <div className="filters-section">
-            <div className="filter-group">
-              <div className="filter-title">Sun Group</div>
-              <div className="filter-options">
-                <button className={`filter-option ${true ? 'active' : ''}`}>Yes</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>No</button>
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <div className="filter-title">By mass regime</div>
-              <div className="filter-options">
-                <button className={`filter-option ${true ? 'active' : ''}`}>Super-Earth</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Giant planet</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Ice giant</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Mini-Neptune</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Super-Jupiter</button>
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <div className="filter-title">By orbital regime</div>
-              <div className="filter-options">
-                <button className={`filter-option ${false ? 'active' : ''}`}>Circumbinary planet</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Double planet</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Eccentric Jupiter</button>
-                <button className={`filter-option ${false ? 'active' : ''}`}>Exoplanet</button>
-              </div>
-            </div>
+            <FilterGroup title="Sun Group" options={filterOptions.sunGroup} />
+            <FilterGroup title="By mass regime" options={filterOptions.massRegime} />
+            <FilterGroup title="By orbital regime" options={filterOptions.orbitalRegime} />
           </div>
 
           <div className="planets-grid-header">Planets</div>
-          <div className="planets-grid">
-            {planets.map((planet) => (
-              <div key={planet.id} className="planet-card">
-                <div className="planet-image" style={{ backgroundImage: `url(${planet.image})` }}></div>
-                <div className="planet-card-name">{planet.name}</div>
-              </div>
-            ))}
+          <div className="planets-grid" role="grid" aria-label="Available planets">
+            {loading ? (
+              <div className="loading-planets">Loading planets...</div>
+            ) : planets.length > 0 ? (
+              planets.map((planet, index) => (
+                <PlanetCard 
+                  key={generateSafeKey(planet, index)} 
+                  planet={planet} 
+                  index={index} 
+                />
+              ))
+            ) : (
+              <div className="no-planets">No planets available</div>
+            )}
           </div>
         </div>
       </div>
     </>
   )
-}
+})
+
+Header.displayName = 'Header'
 
 export default Header
 
