@@ -1,4 +1,4 @@
-import React, { useCallback, memo, useMemo, useEffect, useState } from 'react'
+import React, { useCallback, memo, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../Characteristics.css'
 import { usePlanet } from '../context/PlanetContext'
@@ -72,7 +72,8 @@ const Characteristics = memo(() => {
 
 
   // State for images
-  const [images, setImages] = useState([
+
+  const [images] = useState([
     'fig1_linear_regression.png',
     'fig2_logistic_regression.png',
     'fig3_pca_kmeans.png',
@@ -83,6 +84,7 @@ const Characteristics = memo(() => {
     'fig7_violin_plots.png',
   ])
   const [imgError, setImgError] = useState(null)
+  const [modalImg, setModalImg] = useState(null)
 
   // Optionally, you could fetch the list from the backend if you add a route for it
 
@@ -137,21 +139,106 @@ const Characteristics = memo(() => {
             </div>
 
             <div className="output-images-section" style={{ marginTop: 32 }}>
-              <h3>Exoplanet Analysis Visualizations</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <h3 style={{ marginBottom: 20 }}>Exoplanet Analysis Visualizations</h3>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  gap: 32,
+                  justifyItems: 'center',
+                }}
+              >
                 {images.map((img, idx) => (
-                  <div key={img} style={{ textAlign: 'center' }}>
+                  <div
+                    key={img}
+                    style={{
+                      background: 'rgba(255,255,255,0.15)',
+                      borderRadius: 18,
+                      boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)',
+                      backdropFilter: 'blur(8px)',
+                      border: '1.5px solid rgba(255,255,255,0.25)',
+                      padding: 18,
+                      width: '100%',
+                      maxWidth: 340,
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s',
+                    }}
+                    onClick={() => setModalImg(img)}
+                  >
                     <img
                       src={`http://localhost:5000/output-image?filename=${img}`}
                       alt={img.replace(/_/g, ' ').replace('.png', '')}
-                      style={{ maxWidth: '100%', borderRadius: 8, boxShadow: '0 2px 8px #0002' }}
+                      style={{
+                        width: '100%',
+                        maxWidth: 300,
+                        maxHeight: 180,
+                        objectFit: 'cover',
+                        borderRadius: 12,
+                        boxShadow: '0 2px 8px #0002',
+                        background: '#eaeaea',
+                        marginBottom: 8,
+                        filter: 'drop-shadow(0 2px 8px #0001)',
+                        transition: 'box-shadow 0.2s',
+                      }}
                       onError={() => setImgError(img)}
                     />
-                    <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>{img.replace(/_/g, ' ').replace('.png', '')}</div>
+                    <div style={{ fontSize: 14, color: '#666', marginTop: 4, fontWeight: 500 }}>
+                      {img.replace(/_/g, ' ').replace('.png', '')}
+                    </div>
                     {imgError === img && <div style={{ color: 'red' }}>Image not found</div>}
                   </div>
                 ))}
               </div>
+
+              {/* Modal for full-size image */}
+              {modalImg && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.65)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  onClick={() => setModalImg(null)}
+                >
+                  <img
+                    src={`http://localhost:5000/output-image?filename=${modalImg}`}
+                    alt={modalImg.replace(/_/g, ' ').replace('.png', '')}
+                    style={{
+                      maxWidth: '90vw',
+                      maxHeight: '85vh',
+                      borderRadius: 16,
+                      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.25)',
+                      background: '#fff',
+                      padding: 8,
+                    }}
+                    onClick={e => e.stopPropagation()}
+                  />
+                  <button
+                    style={{
+                      position: 'fixed',
+                      top: 24,
+                      right: 36,
+                      fontSize: 32,
+                      color: '#fff',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      zIndex: 1001,
+                    }}
+                    onClick={() => setModalImg(null)}
+                    aria-label="Close image preview"
+                  >
+                    &times;
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
