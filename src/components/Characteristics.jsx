@@ -1,4 +1,4 @@
-import React, { useCallback, memo, useMemo } from 'react'
+import React, { useCallback, memo, useMemo, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../Characteristics.css'
 import { usePlanet } from '../context/PlanetContext'
@@ -70,6 +70,22 @@ const Characteristics = memo(() => {
           value: currentPlanet?.[key]
         })), [currentPlanet])
 
+
+  // State for images
+  const [images, setImages] = useState([
+    'fig1_linear_regression.png',
+    'fig2_logistic_regression.png',
+    'fig3_pca_kmeans.png',
+    'fig4_decision_tree.png',
+    'fig4_decision_tree_importance.png',
+    'fig5_random_forest_importance.png',
+    'fig6_correlation_heatmap.png',
+    'fig7_violin_plots.png',
+  ])
+  const [imgError, setImgError] = useState(null)
+
+  // Optionally, you could fetch the list from the backend if you add a route for it
+
   if (loading) {
     return <LoadingSpinner />
   }
@@ -118,6 +134,24 @@ const Characteristics = memo(() => {
             </p>
             <div className="characteristics-buttons">
               <BackButton onGoBack={goBack} />
+            </div>
+
+            <div className="output-images-section" style={{ marginTop: 32 }}>
+              <h3>Exoplanet Analysis Visualizations</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                {images.map((img, idx) => (
+                  <div key={img} style={{ textAlign: 'center' }}>
+                    <img
+                      src={`http://localhost:5000/output-image?filename=${img}`}
+                      alt={img.replace(/_/g, ' ').replace('.png', '')}
+                      style={{ maxWidth: '100%', borderRadius: 8, boxShadow: '0 2px 8px #0002' }}
+                      onError={() => setImgError(img)}
+                    />
+                    <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>{img.replace(/_/g, ' ').replace('.png', '')}</div>
+                    {imgError === img && <div style={{ color: 'red' }}>Image not found</div>}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
