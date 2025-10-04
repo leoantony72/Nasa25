@@ -1,77 +1,122 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
+  import { usePlanet } from '../context/PlanetContext'
 
-function PlanetInfo() {
+// Loading component
+const LoadingSpinner = memo(() => (
+  <div className="loading-container">
+    <div className="loading-spinner"></div>
+    <p>Loading planets...</p>
+  </div>
+))
+
+// Error component
+const ErrorMessage = memo(({ error, onRetry }) => (
+  <div className="error-container">
+    <div className="error-icon">⚠️</div>
+    <h3>Oops! Something went wrong</h3>
+    <p>{error}</p>
+    <button className="retry-btn" onClick={onRetry}>
+      Try Again
+    </button>
+  </div>
+))
+
+// Planet buttons component
+const PlanetButtons = memo(({ 
+  onNavigateToCharacteristics, 
+  onPrevPlanet, 
+  onNextPlanet, 
+  canGoPrev, 
+  canGoNext 
+}) => (
+  <div className="planet-buttons">
+    <button 
+      className="planet-btn primary" 
+      onClick={onNavigateToCharacteristics}
+      aria-label="View planet characteristics"
+    >
+      View Characteristics
+    </button>
+    <button 
+      className="planet-btn secondary" 
+      onClick={onPrevPlanet} 
+      disabled={!canGoPrev}
+      aria-label="Go to previous planet"
+    >
+      Previous Planet
+    </button>
+    <button 
+      className="planet-btn secondary" 
+      onClick={onNextPlanet} 
+      disabled={!canGoNext}
+      aria-label="Go to next planet"
+    >
+      Next Planet
+    </button>
+  </div>
+))
+
+const PlanetInfo = memo(() => {
   const navigate = useNavigate()
+  const { 
+    currentPlanet, 
+    loading, 
+    error, 
+    handleNextPlanet, 
+    handlePrevPlanet,
+    canGoNext,
+    canGoPrev,
+    hasPlanets
+  } = usePlanet()
 
-  const [planets, setPlanets] = useState([])
-  const [currentPlanetIndex, setCurrentPlanetIndex] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const navigateToCharacteristics = useCallback(() => {
+    if (hasPlanets) {
+      navigate('/characteristics')
+    }
+  }, [navigate, hasPlanets])
 
-  useEffect(() => {
-    fetch('http://127.0.0.1:5000/data')
-      .then(res => res.json())
-      .then(data => {
-        setPlanets(data)
-        setCurrentPlanetIndex(0) // Show the first planet after fetch
-        setLoading(false)
-      })
-      .catch(err => {
-        setError('Error fetching data: ' + err)
-        setLoading(false)
-      })
+  const handleRetry = useCallback(() => {
+    window.location.reload()
   }, [])
 
-  const currentPlanet = planets[currentPlanetIndex] || {}
-
-
-  const navigateToCharacteristics = () => {
-    if (planets.length > 0) {
-      navigate('/characteristics', { state: { planet: currentPlanet } })
-    }
-  }
-
-
-  const handleNextPlanet = () => {
-    if (planets.length > 0) {
-      setCurrentPlanetIndex((prevIndex) => (prevIndex + 1) % planets.length)
-    }
-  }
-
-  const handlePrevPlanet = () => {
-    if (planets.length > 0) {
-      setCurrentPlanetIndex((prevIndex) => (prevIndex - 1 + planets.length) % planets.length)
-    }
-  }
-
-
   if (loading) {
-    return <div>Loading planets...</div>
+    return <LoadingSpinner />
   }
+
   if (error) {
-    return <div>{error}</div>
+    return <ErrorMessage error={error} onRetry={handleRetry} />
+  }
+
+  if (!currentPlanet || !hasPlanets) {
+    return (
+      <div className="no-data-container">
+        <div className="no-data-icon">🌌</div>
+        <h3>No planets available</h3>
+        <p>There are no planets to display at the moment.</p>
+      </div>
+    )
   }
 
   return (
     <div className="planet-info">
       <div className="planet-info-content">
-        <h1 className="planet-title">{currentPlanet.object_id}</h1>
-        <p>{currentPlanet.description}</p>
-        <div className="planet-buttons">
-          <button className="planet-btn primary" onClick={navigateToCharacteristics}>
-            View Characteristics
-          </button>
-          <button className="planet-btn secondary" onClick={handlePrevPlanet} disabled={planets.length === 0}>
-            Previous Planet
-          </button>
-          <button className="planet-btn secondary" onClick={handleNextPlanet} disabled={planets.length === 0}>
-            Next Planet
-          </button>
-        </div>
+        <h1 className="planet-title">{currentPlanet.object_id || 'Unknown Planet'}</h1>
+        <p className="planet-description">
+          {currentPlanet.description || 'No description available for this planet.'}
+        </p>
+        <PlanetButtons
+          onNavigateToCharacteristics={navigateToCharacteristics}
+          onPrevPlanet={handlePrevPlanet}
+          onNextPlanet={handleNextPlanet}
+          canGoPrev={canGoPrev}
+          canGoNext={canGoNext}
+        />
       </div>
     </div>
   )
-}
+})
+
+PlanetInfo.displayName = 'PlanetInfo'
 
 export default PlanetInfo
