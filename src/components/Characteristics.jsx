@@ -51,14 +51,24 @@ const Characteristics = memo(() => {
   }, [])
 
   // Memoized characteristic data
-  const characteristics = useMemo(() => [
-    { name: 'By composition', value: currentPlanet?.composition },
-    { name: 'By orbital regime', value: currentPlanet?.orbital_regime },
-    { name: 'By mass regime', value: currentPlanet?.mass_regime },
-    { name: 'Water', value: currentPlanet?.water },
-    { name: 'Suitable for living organisms', value: currentPlanet?.suitable_for_life },
-    { name: 'Location', value: currentPlanet?.location }
-  ], [currentPlanet])
+        const characteristics = useMemo(() => [
+          ['depth_ppm', 'Depth (ppm)'],
+          ['duration_hours', 'Duration (hours)'],
+          ['duty_cycle', 'Duty Cycle'],
+          ['label', 'Label'],
+          ['label_raw', 'Label Raw'],
+          ['mission', 'Mission'],
+          ['mission_encoded', 'Mission Encoded'],
+          ['object_id', 'Object ID'],
+          ['period_days', 'Period (days)'],
+          ['planet_radius_from_depth', 'Planet Radius (from depth)'],
+          ['planet_radius_rearth', 'Planet Radius (Earth radii)'],
+          ['score', 'Score'],
+          ['transit_frequency', 'Transit Frequency']
+        ].map(([key, label]) => ({
+          name: label,
+          value: currentPlanet?.[key]
+        })), [currentPlanet])
 
   if (loading) {
     return <LoadingSpinner />
