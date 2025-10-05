@@ -40,7 +40,7 @@ const BackButton = memo(({ onGoBack }) => (
 
 const Characteristics = memo(() => {
   const navigate = useNavigate()
-  const { currentPlanet, loading, error } = usePlanet()
+  const { currentPlanet, loading, error, planets } = usePlanet()
   
   const goBack = useCallback(() => {
     navigate('/')
@@ -163,7 +163,21 @@ const Characteristics = memo(() => {
                       cursor: 'pointer',
                       transition: 'transform 0.15s',
                     }}
-                    onClick={() => setModalImg(img)}
+                    onClick={() => {
+                      if (img === 'fig1_linear_regression.png') {
+                        // Save only minimal planet data to localStorage for index.html
+                        const minimalPlanets = planets.map(p => ({
+                          period_days: p.period_days,
+                          depth_ppm: p.depth_ppm,
+                          planet_radius_rearth: p.planet_radius_rearth,
+                          label_raw: p.label_raw
+                        }));
+                        localStorage.setItem('planets_data', JSON.stringify(minimalPlanets));
+                        window.open('/server/index.html', '_blank');
+                      } else {
+                        setModalImg(img);
+                      }
+                    }}
                   >
                     <img
                       src={`http://localhost:5000/output-image?filename=${img}`}
