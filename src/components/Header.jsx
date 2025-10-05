@@ -101,7 +101,11 @@ const Header = memo(() => {
           
           <div className="header-right">
             <MenuToggleButton isOpen={isMenuOpen} onToggle={toggleMenu} />
-            <button className="donate-btn" aria-label="Redirects to donation page">
+            <button
+              className="donate-btn"
+              aria-label="Redirects to donation page"
+              onClick={() => window.location.href = "https://deddee362911.ngrok-free.app"}
+            >
               Predict
             </button>
           </div>
