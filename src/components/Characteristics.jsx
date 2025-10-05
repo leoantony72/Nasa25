@@ -112,16 +112,20 @@ const Characteristics = memo(() => {
       <header className="header">
         <div className="header-content">
           <div className="header-left">
-            <a href="/" className="logo-link" aria-label="Home">Logo</a>
+            <a href="/" className="logo-link" aria-label="Home">Delta-V</a>
           </div>
           <nav className="header-nav" role="navigation" aria-label="Main navigation">
             <a href="#" className="nav-link">Planets</a>
             <a href="#" className="nav-link">Explore</a>
             <a href="#" className="nav-link">About us</a>
           </nav>
-          <button className="donate-btn" aria-label="Donate to support our mission">
-            Donate
-          </button>
+          <button
+              className="donate-btn"
+              aria-label="Redirects to donation page"
+              onClick={() => window.location.href = "https://deddee362911.ngrok-free.app"}
+            >
+              Predict
+            </button>
         </div>
       </header>
 
