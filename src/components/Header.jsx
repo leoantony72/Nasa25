@@ -90,7 +90,7 @@ const Header = memo(() => {
       <header className="header">
         <div className="header-content">
           <div className="header-left">
-            <a href="/" className="logo-link" aria-label="Home">Logo</a>
+            <a href="/" className="logo-link" aria-label="Home">Delta-V</a>
           </div>
           
           <nav className="header-nav" role="navigation" aria-label="Main navigation">
@@ -101,8 +101,8 @@ const Header = memo(() => {
           
           <div className="header-right">
             <MenuToggleButton isOpen={isMenuOpen} onToggle={toggleMenu} />
-            <button className="donate-btn" aria-label="Donate to support our mission">
-              Donate
+            <button className="donate-btn" aria-label="Redirects to donation page">
+              Predict
             </button>
           </div>
         </div>
